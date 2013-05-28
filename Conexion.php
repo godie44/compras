@@ -121,6 +121,13 @@ class Conexion {
                         }
                         
                     }
+                    
+                    $total= mssql_query('select sum(cantidad * precioUnitario) from compras.dbo.desgloseFactura where idFactura='.$idF,  $this->conexion);
+                    while($row=  mssql_fetch_array($total)){
+                        $totalNeto= $row[0];
+                    }
+                    mssql_query('update compras.dbo.factura set total = ',$this->conexion);
+                    
                 }
             } else {
                 echo 'No se pudo insertar la factura';
@@ -185,6 +192,9 @@ class Conexion {
         }
         return $clientes;
     }
+    
+    
+    public function 
 
 }
 
