@@ -194,11 +194,11 @@ class Conexion {
     }
     
     
-    public function GetDescuento(){
+    public function GetDescuento($_total){
         try{
             $this->Conectar();
             
-            mssql_query('select idDescuento,descuento,precio from compras.dbo.descuento',  $this->conexion);
+            mssql_query('select idDescuento,descuento,precio from compras.dbo.descuento order by precio desc',  $this->conexion);
             
             mssql_close($this->conexion);
         }  catch (Exception $ex){
