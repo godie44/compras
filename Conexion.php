@@ -2,6 +2,7 @@
 
 include 'ProductoEn.php';
 include 'ClienteEn.php';
+include 'FacturaEn';
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -239,11 +240,30 @@ class Conexion {
     }
     
     public function GetDetallesFactura($_idFactura){
+        $desglose = array();
         try{
             $this->Conectar();
             
             $query = mssql_query('select f.idFactura,df.idProducto,df.cantidad,df.precioUnitario,p.nombre,f.idCliente,c.nombre,c.telefono,f.fecha,f.descuento,f.exception.f.total,f.idUsuario,u.nombre from compras.dbo.desgloseFactura df inner join compras.dbo.factura f on df.idFactura = f.idFactura inner join compras.dbo.cliente c on f.idCliente = c.idCliente innerjoin compras.dbo.usuario u on u.idUsuario = f.idUsuario inner join compras.dbo.producto p on df.idProducto = p.idProducto where df.idFactura ='.$_idFactura,  $this->conexion);
             
+            while($row=  mssql_fetch_array($query)){
+                $infoFact = new FacturaEn();
+                $infoFact->getIdFactura($row[0]);
+                $infoFact->getIdProducto($row[1]);
+                $infoFact->getCantidadProducto($row[2]);
+                $infoFact->getPrecioProducto($row[3]);
+                $infoFact->getNombreProducto($row[4]);
+                $infoFact->getIdCliente($row[5]);
+                $infoFact->getTelefono($row[6]);
+                $infoFact->getFecha($row[7]);
+                $infoFact->getDescuento($row[8]);
+                $infoFact->getException($row[9]);
+                $infoFact->getTotal($row[10]);
+                $infoFact->getIdUsuario($row[11]);
+                $infoFact->getNombreUsuario($row[12]);
+                
+                array_push($desglose, $infoFact);
+            }
             
             
             
@@ -252,6 +272,7 @@ class Conexion {
             echo $ex;
             mssql_close($this->conexion);
         }
+        return $desglose;
     }
 
 }
