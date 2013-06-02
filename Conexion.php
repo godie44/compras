@@ -126,7 +126,13 @@ class Conexion {
                     while($row=  mssql_fetch_array($total)){
                         $totalNeto= $row[0];
                     }
-                    mssql_query('update compras.dbo.factura set total = ',$this->conexion);
+                    $descuento = $this->GetDescuento($total);
+                    $totalFinal =$totalNeto - ($totalNeto*($descuento/100));
+                    if($this->GetExcepcionImpuestos($idF)){
+                       $totalFinal =$totalNeto - ($totalNeto*(13/100)); 
+                    }
+                    
+                    mssql_query('update compras.dbo.factura set total = '.$totalFinal.' where idFactura='.$idF,$this->conexion);
                     
                 }
             } else {
@@ -145,11 +151,12 @@ class Conexion {
         try {
             $this->Conectar();
             $query = mssql_query('select idPedido from compras.dbo.pedidosXFactura where idFactura=' . $idFactura, $this->conexion);
-            if (!mssql_num_rows($query)) {
+            if (!mssql_num_rows($query)) {           
                 $query = mssql_query('insert into compras.dbo.pedido(fecha,idUsuario) values(getdate(),'.$idUsuario.')');
             }
-            $query = mssql_query('select top 1 idPedido,fecha from compras.dbo.pedido where idUsuario=' . $idUsuario . ' order by fecha desc', $this->conexion);
-            $row = mssql_fetch_array($query);
+            $queryId = mssql_query('select top 1 idPedido,fecha from compras.dbo.pedido where idUsuario=' . $idUsuario . ' order by fecha desc', $this->conexion);
+           
+            $row = mssql_fetch_array($queryId);
             $idP = $row[0];
 
             mssql_query('insert into compras.dbo.pedidosXFactura(idFactura,idPedido) values('.$idFactura.','.$idP.')', $this->conexion);
@@ -195,16 +202,56 @@ class Conexion {
     
     
     public function GetDescuento($_total){
+        $descuento = 0;
         try{
             $this->Conectar();
             
-            mssql_query('select idDescuento,descuento,precio from compras.dbo.descuento order by precio desc',  $this->conexion);
+            $query = mssql_query('select idDescuento,descuento,precio from compras.dbo.descuento order by precio desc',  $this->conexion);
             
+            while($row= mssql_fetch_array($query)){
+                if($_total > $row[2]){
+                    $descuento = $row[1];
+                    break;
+                }
+            }
             mssql_close($this->conexion);
         }  catch (Exception $ex){
             echo $ex->getMessage();
             mssql_close($this->conexion);
     }
+    return $descuento;
+    }
+    
+    public function GetExcepcionImpuestos($_idFactura){
+        $excepcion = false;
+        try {
+            $this->Conectar();
+            $query = mssql_query('select idExcepcion,idCliente,archivo,idFactura from compras.dbo.excepcion where idFactura='.$_idFactura,$this->conexion);
+            if(mssql_num_rows($query)){
+                $excepcion = true;
+            }
+            mssql_close($this->conexion);
+        }  catch (Exception $ex){
+            echo $ex;
+            mssql_close($this->conexion);
+        }
+          return $excepcion;      
+    }
+    
+    public function GetDetallesFactura($_idFactura){
+        try{
+            $this->Conectar();
+            
+            $query = mssql_query('select f.idFactura,df.idProducto,df.cantidad,df.precioUnitario,p.nombre,f.idCliente,c.nombre,c.telefono,f.fecha,f.descuento,f.exception.f.total,f.idUsuario,u.nombre from compras.dbo.desgloseFactura df inner join compras.dbo.factura f on df.idFactura = f.idFactura inner join compras.dbo.cliente c on f.idCliente = c.idCliente innerjoin compras.dbo.usuario u on u.idUsuario = f.idUsuario inner join compras.dbo.producto p on df.idProducto = p.idProducto where df.idFactura ='.$_idFactura,  $this->conexion);
+            
+            
+            
+            
+         mssql_close($this->conexion);
+        }  catch (Exception $ex){
+            echo $ex;
+            mssql_close($this->conexion);
+        }
     }
 
 }
