@@ -54,7 +54,7 @@ class Conexion {
     }
 
     public function InfoProductos($idProducto = NULL) {
-        $info=0;
+        $info='';
         try {
             $this->Conectar();
             if ($idProducto == NULL) {
@@ -64,19 +64,19 @@ class Conexion {
                     $prod = new ProductoEn();
                     $prod->setIdProducto($row['idProducto']);
                     $prod->setNombre($row['nombre']);
-                    $prod->setCantidad($row['cantidad']);
+                    $prod->setCantidad($row['cantidadInventario']);
                     $prod->getPrecio($row['precio']);
 
                     array_push($info, $prod);
                 }
             } else {
-                $query = mssql_query('select * from compras.dbo.producto where idProducto='.$idProducto, $this->conexion);
+                $query = mssql_query('select idProducto,nombre,cantidadInventario,precio from compras.dbo.producto where idProducto='.$idProducto, $this->conexion);
                 $row = mssql_fetch_array($query);
                 $info = new ProductoEn();
                 $info->setIdProducto($row['idProducto']);
                 $info->setNombre($row['nombre']);
-                $info->setCantidad($row['cantidad']);
-                $info->getPrecio($row['precio']);
+                $info->setCantidad($row['cantidadInventario']);
+                $info->setPrecio($row['precio']);
             }
 
             mssql_close($this->conexion);

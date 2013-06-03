@@ -1,45 +1,48 @@
 <?php
-include 'FacturaEn.php';
-include 'ProductoEn.php';
-include 'ClienteEn.php';
 include 'Conexion.php';
 
+
 session_start();
-echo 'Entro aqui';
+
 if($_POST["producto"])
 {
+   
    $con = new Conexion();
-   $listaProductos=$_SESSION['productos'];
+   if(isset($_SESSION['productos'])){
+   $listaProductos=$_SESSION['productos'];}
+   else{$listaProductos=array();}
    $prod =$con->InfoProductos($_POST["producto"]);
    $prod->setCantidad($_POST["cantidad"]);
    array_push($listaProductos,$prod);
-   
-   foreach ($listaProductos as $producto){
-       echo '<table>
+   echo '<table>
            <tr>
            <th>Id</th>
            <th>Nombre</th>
            <th>Cantidad solicitada</th>
            <th>Costo Unitario</th>
            <th>Total</th>
-           </tr>
+           </tr>';
+   foreach ($listaProductos as $producto){
+       echo '
            <tr>
-           <td>'.$producto->getIdProducto.'</td>
-           <td>'.$producto->getNombre.'</td>
-           <td>'.$producto->getCantidad.'</td>
-           <td>'.$producto->getPrecio.'</td>
-           <td>'.$producto->getPrecio * $producto->getCantidad.'</td>
+           <td>'.$producto->getIdProducto().'</td>
+           <td>'.$producto->getNombre().'</td>
+           <td>'.$producto->getCantidad().'</td>
+           <td>'.$producto->getPrecio().'</td>
+           <td>'.$producto->getPrecio() * $producto->getCantidad().'</td>
            </tr>
-           </table>';
+           ';
        
    }
+   echo '</table>';
    $_SESSION['productos']= $listaProductos;
    $_POST['producto']=NULL;
 }elseif($_POST['idProducto'])
     {
+        
         $con = new Conexion();
         $prod =$con->InfoProductos($_POST["idProducto"]);
-        echo $prod->getCantidad();
+        echo 'Cantidad disponible: '.$prod->getCantidad().'<br/>Precio: '.$prod->getPrecio();
     }
 /*
  * To change this template, choose Tools | Templates

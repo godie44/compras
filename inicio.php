@@ -10,32 +10,39 @@ and open the template in the editor.
         <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
         <title></title>
         <script>
-        function agregaProducto()
+        $(document).ready(function(){
+            $("#ddlProductos").change(function()
         {
-            var parametros = {"producto":$("#ddlProductos").val(),"cantidad":$("#txtCantidad").val() };
-            
+            var id = $("#ddlProductos").val();
             $.ajax({
-                    data: parametros,
-                    url: "acciones.php",
-                    type: "POST",
-                    success: function(response){
-                        $("#idProductos").html(response);
-                    }
-            });
-        }
-        function infoProducto()
-        {
-            alert($("#ddlProductos").val());
-            var parametros={"idProducto": $("#ddlProductos").val()};
-            $.ajax({
-                data: parametros,
+                data: {idProducto: id},
                 url: "acciones.php",
                 type: "POST"
                  
             }).done(function(response){
+                    
                     $("#disponible").html(response);
                 });
-        }
+        });
+        $('#btnAgregar').click(function()
+        {
+            
+            
+            $.ajax({
+                    data: {producto:$("#ddlProductos").val(),cantidad:$("#txtCantidad").val() },
+                    url: "acciones.php",
+                    type: "POST",
+                    beforeSend: function () {
+                        $("#idProductos").html("Procesando, espere por favor...");}
+
+                    }).done(function(response){
+                        $("#idProductos").html(response);});
+            });
+        });
+        
+        
+        
+        
         </script>
     </head>
     <body>
@@ -54,7 +61,7 @@ and open the template in the editor.
         ?>
         <div id="content">
             <div id="top"></div>
-        <form methos="POST" action="factura.php">
+        
             <center>
             <span>Clientes</span>
             <select id="ddlCliente">
@@ -67,7 +74,7 @@ and open the template in the editor.
             </select>
             <br/><br/>
             <Span>Productos</span>
-            <select id="ddlProductos" onchange="infoProducto()">
+            <select id="ddlProductos">
                 <?php
                     $productos = $con->InfoProductos();
                     foreach ($productos as $producto){
@@ -76,12 +83,13 @@ and open the template in the editor.
                     }
                 ?>
             </select><br/>
-            <span>Cantidad disponible: </span><span id="disponible"></span><br/>
-            <span>Cantidad deseada</span><span><input type="text" id="txtCantidad"></text></span>
+            <div id="disponible"></div><br/>
+            <span>Cantidad deseada</span><span><input type="text" id="txtCantidad" style="width: 30px"></text></span>
+            <button id="btnAgregar">Agregar</button>
             <div id="idProductos"></div>
             </center>
             
-        </form>
+        
         </div>
         
         
