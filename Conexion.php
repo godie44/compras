@@ -3,6 +3,7 @@
 include 'ProductoEn.php';
 include 'ClienteEn.php';
 include 'FacturaEn';
+include 'UsuarioEn.php';
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -214,7 +215,26 @@ class Conexion {
             
             }
             
-    public function InsertaProducto($producto){
+            
+      public function InsertaUsuario($usuario){
+        
+        $this->Conectar();
+        $q = mssql_query("insert into compras.dbo.cliente(nombre,apellidos,telefono,direccion,usuario,password) values('". $usuario->getNombre() ."',". $usuario->getTelefono() .",'". $usuario->getDireccion() ."','". $usuario->getUsuario() . "',".$usuario->getPassword().")", $this->conexion);
+        $n= mssql_rows_affected($this->conexion);
+        echo " 
+                <script language=’JavaScript’> 
+                alert(‘Cliente agregado con exito’); 
+                </script>";
+        mssql_close($this->conexion);
+        return $n;
+            
+            }     
+       
+            
+            
+            
+            
+    public function InsertaProductoNuevo($producto){
         
         $this->Conectar();
         $q = mssql_query("insert into compras.dbo.producto(nombre,precio,cantidadInventario) values('". $producto->getNombre() ."',". $producto->getPrecio() .",'". $producto->getCantidad() .")", $this->conexion);
