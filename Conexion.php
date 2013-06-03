@@ -70,6 +70,8 @@ class Conexion {
                     array_push($info, $prod);
                 }
             } else {
+                $query = mssql_query('select * from compras.dbo.producto where idProducto='.$idProducto, $this->conexion);
+                $row = mssql_fetch_array($query);
                 $info = new ProductoEn();
                 $info->setIdProducto($row['idProducto']);
                 $info->setNombre($row['nombre']);
