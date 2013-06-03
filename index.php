@@ -22,6 +22,7 @@
         include ("Conexion.php");
         session_start();
         $_SESSION['productos']=NULL;
+        $_SESSION['usuario'] = NULL;
         if($_POST['usuario'] and $_POST['password']){
         $con = new Conexion();
         

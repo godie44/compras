@@ -95,7 +95,7 @@ class Conexion {
 
             if (mssql_rows_affected($this->conexion)>0) {
                 
-                $idFetch = mssql_query('select top 1 idFactura,fecha from compras.dbo.factura where idUsuario=' . $idUsuario . ' order by fecha desc', $this->conexion);
+                $idFetch = mssql_query('select top 1 idFactura,fecha from compras.dbo.factura where idUsuario=' . $idUsuario . ' and idCliente='.$idCliente.' order by fecha desc', $this->conexion);
                 
                 while ($row = mssql_fetch_array($idFetch)) {
                     $idF = $row['idFactura'];
@@ -103,11 +103,15 @@ class Conexion {
                 }
                 foreach ($productos as $producto) {
                     $infoProducto = $this->InfoProductos($producto->getIdProducto());
+                    echo '-'.$idF.'-';
+                    echo $infoProducto->getNombre();
                     if (($infoProducto->getCantidad() - $producto->getCantidad()) >= 0) {
                         $querydesglose = mssql_query('insert into compras.dbo.desgloseFactura(idFactura,idProducto,cantidad,precioUnitario) values(' . $idF . ',' . $producto->getIdProducto() . ',' . $producto->getCantidad() . ',' . $producto->getPrecio() . ')', $this->conexion);
+                        echo mssql_rows_affected($this->conexion);
                         if (mssql_rows_affected($this->conexion)<0) {
                             echo 'No se pudo insertar el producto: ' . $infoProducto->getNombre();
                         } else {
+                            echo 'aqui va';
                             $act = mssql_query('update compras.dbo.producto set cantidadInventario=' . ($infoProducto->getCantidad() - $producto->getCantidad()) . ' where idProducto=' . $infoProducto->getIdProducto());
                         }
                     }else{
@@ -136,10 +140,10 @@ class Conexion {
                     if($descuento == 1){
                     $descuentoC = $this->GetDescuento($total);
                     $totalFinal =$totalNeto - ($totalNeto*($descuentoC/100));}
-                    $descuentoC =0;
+                    else{$descuentoC =0;}
                     if(!$this->GetExcepcionImpuestos($idF)){
                     $impuesto = 13;
-                    $totalFinal =$totalNeto - ($totalNeto*(13/100)); 
+                    $totalFinal =$totalNeto + ($totalNeto*(13/100)); 
                     }else{
                         $impuesto= 0;
                     }
@@ -296,13 +300,14 @@ class Conexion {
                 $infoFact->setPrecioProducto($row[3]);
                 $infoFact->setNombreProducto($row[4]);
                 $infoFact->setIdCliente($row[5]);
-                $infoFact->setTelefono($row[6]);
-                $infoFact->setFecha($row[7]);
-                $infoFact->setDescuento($row[8]);
-                $infoFact->setException($row[9]);
-                $infoFact->setTotal($row[10]);
-                $infoFact->setIdUsuario($row[11]);
-                $infoFact->setNombreUsuario($row[12]);
+                $infoFact->setNombreCliente($row[6]);
+                $infoFact->setTelefono($row[7]);
+                $infoFact->setFecha($row[8]);
+                $infoFact->setDescuento($row[9]);
+                $infoFact->setException($row[10]);
+                $infoFact->setTotal($row[11]);
+                $infoFact->setIdUsuario($row[12]);
+                $infoFact->setNombreUsuario($row[13]);
                 
                 array_push($desglose, $infoFact);
             }
