@@ -14,13 +14,14 @@ if($_POST["producto"])
    $prod =$con->InfoProductos($_POST["producto"]);
    $prod->setCantidad($_POST["cantidad"]);
    array_push($listaProductos,$prod);
-   echo '<table>
-           <tr>
+   echo '<table style="border-collapse:collapse;border: 1px solid blue;border-spacing:50px 0">
+           <tr style="border-collapse:collapse;border: 1px solid blue;">
            <th>Id</th>
            <th>Nombre</th>
            <th>Cantidad solicitada</th>
            <th>Costo Unitario</th>
            <th>Total</th>
+           <th></th>
            </tr>';
    foreach ($listaProductos as $producto){
        echo '
@@ -29,9 +30,15 @@ if($_POST["producto"])
            <td>'.$producto->getNombre().'</td>
            <td>'.$producto->getCantidad().'</td>
            <td>'.$producto->getPrecio().'</td>
-           <td>'.$producto->getPrecio() * $producto->getCantidad().'</td>
-           </tr>
-           ';
+           <td>'.$producto->getPrecio() * $producto->getCantidad().'</td>';
+           $cant=$con->InfoProductos($producto->getIdProducto());
+           if($cant->getCantidad()<$producto->getCantidad()){
+               echo '<td style="color:green">Se hara un pedido extra por los '.($producto->getCantidad()-$cant->getCantidad()).' faltantes</td>
+                     </tr>';
+           }else{
+               echo '<td></td></tr>';
+           }
+           
        
    }
    echo '</table>';

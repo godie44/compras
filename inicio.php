@@ -11,6 +11,7 @@ and open the template in the editor.
         <title></title>
         <script>
         $(document).ready(function(){
+            $("#btnFacturar").hide();
             $("#ddlProductos").change(function()
         {
             var id = $("#ddlProductos").val();
@@ -36,8 +37,40 @@ and open the template in the editor.
                         $("#idProductos").html("Procesando, espere por favor...");}
 
                     }).done(function(response){
-                        $("#idProductos").html(response);});
+                        
+                        
+                        $("#idProductos").fadeOut(1000,function(){$("#idProductos").html(response);});
+                        $("#btnFacturar").fadeIn(2500);
+                        $("#idProductos").fadeIn(2000);
+                    });
+                        
             });
+            
+            
+            $('#btnFacturar').click(function()
+        {
+            
+            
+            $.ajax({
+                    data: {producto:$("#ddlProductos").val(),cantidad:$("#txtCantidad").val() },
+                    url: "acciones.php",
+                    type: "POST",
+                    beforeSend: function () {
+                        $("#idProductos").html("Procesando, espere por favor...");}
+
+                    }).done(function(response){
+                        
+                        
+                        $("#idProductos").fadeOut(1000,function(){$("#idProductos").html(response);});
+                        $("#btnFacturar").fadeIn(2500);
+                        $("#idProductos").fadeIn(2000);
+                    });
+                        
+            });
+            
+            
+            
+            
         });
         
         
@@ -55,16 +88,17 @@ and open the template in the editor.
             if(!isset($_SESSION['usuario'])){
                 header("Location:index.php");
             }else{
-                echo 'Usuario actual:'.$_SESSION['user'];
+                
                 $con = new Conexion();
             }
         ?>
         <div id="content">
             <div id="top"></div>
-        
+            <?php echo 'Usuario actual:'.$_SESSION['user'];?>
             <center>
+                <form action="factura.php" method="POST">
             <span>Clientes</span>
-            <select id="ddlCliente">
+            <select name="idCliente" id="ddlCliente">
                 <?php
                     $clientes = $con->InfoClientes();
                     foreach($clientes as $cliente){
@@ -74,7 +108,7 @@ and open the template in the editor.
             </select>
             <br/><br/>
             <Span>Productos</span>
-            <select id="ddlProductos">
+            <select name="idProducto" id="ddlProductos">
                 <?php
                     $productos = $con->InfoProductos();
                     foreach ($productos as $producto){
@@ -85,8 +119,11 @@ and open the template in the editor.
             </select><br/>
             <div id="disponible"></div><br/>
             <span>Cantidad deseada</span><span><input type="text" id="txtCantidad" style="width: 30px"></text></span>
-            <button id="btnAgregar">Agregar</button>
+            <button type="button" id="btnAgregar">Agregar</button>
             <div id="idProductos"></div>
+            <br/><br/>
+            <input type="submit" id="btnFacturar" name="Enviar" value="Generar Factura"/>
+            </form>
             </center>
             
         

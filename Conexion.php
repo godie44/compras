@@ -204,6 +204,36 @@ class Conexion {
     }
     
     
+    public function InfoCliente($_idCliente)
+    {
+       $cliente = new ClienteEn();
+        try{
+            $this->Conectar();
+            
+            $query= mssql_query('select idCliente,nombre,telefono,direccion,contacto,tipo from compras.dbo.cliente where idCliente='.$_idCliente,  $this->conexion);
+            
+            while($row = mssql_fetch_array($query)){
+                
+                $cliente->setIdCliente($row[0]);
+                $cliente->setNombre($row[1]);
+                $cliente->setTelefono($row[2]);
+                $cliente->setDireccion($row[3]);
+                $cliente->setContacto($row[4]);
+                $cliente->setTipo($row[5]);
+                
+                
+            }
+            
+            mssql_close($this->conexion);
+        }  catch (Exception $e){
+            echo $e;
+            mssql_close($this->conexion);
+            
+        }
+        return $cliente;
+    }
+    
+    
     public function GetDescuento($_total){
         $descuento = 0;
         try{
