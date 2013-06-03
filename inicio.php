@@ -47,26 +47,7 @@ and open the template in the editor.
             });
             
             
-            $('#btnFacturar').click(function()
-        {
             
-            
-            $.ajax({
-                    data: {producto:$("#ddlProductos").val(),cantidad:$("#txtCantidad").val() },
-                    url: "acciones.php",
-                    type: "POST",
-                    beforeSend: function () {
-                        $("#idProductos").html("Procesando, espere por favor...");}
-
-                    }).done(function(response){
-                        
-                        
-                        $("#idProductos").fadeOut(1000,function(){$("#idProductos").html(response);});
-                        $("#btnFacturar").fadeIn(2500);
-                        $("#idProductos").fadeIn(2000);
-                    });
-                        
-            });
             
             
             
@@ -94,6 +75,9 @@ and open the template in the editor.
         ?>
         <div id="content">
             <div id="top"></div>
+            <div id="menu" style="background-color: lightblue;width: 800px">
+                <a href="insertaCliente.php">Nuevo Cliente</a>
+            </div>
             <?php echo 'Usuario actual:'.$_SESSION['user'];?>
             <center>
                 <form action="factura.php" method="POST">
@@ -119,11 +103,13 @@ and open the template in the editor.
             </select><br/>
             <div id="disponible"></div><br/>
             <span>Cantidad deseada</span><span><input type="text" id="txtCantidad" style="width: 30px"></text></span>
-            <button type="button" id="btnAgregar">Agregar</button>
+            <button id="btnAgregar" type="button">Agregar</button>
             <div id="idProductos"></div>
+            
             <br/><br/>
             <input type="submit" id="btnFacturar" name="Enviar" value="Generar Factura"/>
             </form>
+                
             </center>
             
         

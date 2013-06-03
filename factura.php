@@ -11,6 +11,8 @@ and open the template in the editor.
         <title></title>
     </head>
     <body>
+        <div id="content">
+            <div id="top"></div>
         <?php
         include 'Conexion.php';
         session_start();
@@ -24,12 +26,13 @@ and open the template in the editor.
                 $cliente = $con->InfoCliente($_POST['idCliente']);
                 $productos=$_SESSION['productos'];
                 $idFactura = $con->InsertarCompra($cliente->getIdCliente(), $_SESSION['usuario'], $productos, $cliente->getTipo());
-                
+                echo '<br/>Esta es la factura ='.$idFactura;
                 $factura = $con->GetDetallesFactura($idFactura);
                 echo 'entro2';
                 foreach($factura as $info)
                     {
-                        echo $info->getIdFactura();
+                    echo 'entro2<br/>';
+                        
                         echo $info->getIdProducto();
                         echo $info->getNombreProducto();
                     }
@@ -38,5 +41,7 @@ and open the template in the editor.
             header("Location:index.php");
         }
         ?>
+        
+        </div> 
     </body>
 </html>

@@ -106,16 +106,18 @@ class Conexion {
                     echo '-'.$idF.'-';
                     echo $infoProducto->getNombre();
                     if (($infoProducto->getCantidad() - $producto->getCantidad()) >= 0) {
-                        $querydesglose = mssql_query('insert into compras.dbo.desgloseFactura(idFactura,idProducto,cantidad,precioUnitario) values(' . $idF . ',' . $producto->getIdProducto() . ',' . $producto->getCantidad() . ',' . $producto->getPrecio() . ')', $this->conexion);
-                        echo mssql_rows_affected($this->conexion);
-                        if (mssql_rows_affected($this->conexion)<0) {
+                        echo 'aqui va antes de';
+                        $n = $this->insertaProducto($producto, $idF);
+                        echo '---'.$n;
+                        if ($n<0) {
                             echo 'No se pudo insertar el producto: ' . $infoProducto->getNombre();
                         } else {
                             echo 'aqui va';
                             $act = mssql_query('update compras.dbo.producto set cantidadInventario=' . ($infoProducto->getCantidad() - $producto->getCantidad()) . ' where idProducto=' . $infoProducto->getIdProducto());
                         }
                     }else{
-                        $querydesglose = mssql_query('insert into compras.dbo.desgloseFactura(idFactura,idProducto,cantidad,precioUnitario) values(' . $idF . ',' . $producto->getIdProducto() . ',' . $infoProducto->getCantidad() . ',' . $producto->getPrecio() . ')', $this->conexion);
+                        $producto->setCantidad($infoProducto->getCantidad());
+                        $n = $this->insertaProducto($producto, $idF);
                         $solicitud = new ProductoEn();
                         $solicitud->setIdProducto($infoProducto->getIdProducto());
                         $solicitud->setNombre($infoProducto->getNombre());
@@ -132,7 +134,9 @@ class Conexion {
                         
                     }
                     
-                    $total= mssql_query('select sum(cantidad * precioUnitario) from compras.dbo.desgloseFactura where idFactura='.$idF,  $this->conexion);
+                    
+                }
+                $total= mssql_query('select sum(cantidad * precioUnitario) from compras.dbo.desgloseFactura where idFactura='.$idF,  $this->conexion);
                     while($row=  mssql_fetch_array($total)){
                         $totalNeto= $row[0];
                     }
@@ -150,7 +154,6 @@ class Conexion {
                     
                     mssql_query('update compras.dbo.factura set total = '.$totalFinal.',descuento='.$descuentoC.',impuesto='.$impuesto.' where idFactura='.$idF,$this->conexion);
                     
-                }
             } else {
                 echo 'No se pudo insertar la factura';
             }
@@ -186,6 +189,28 @@ class Conexion {
             mssql_close($this->conexion);
         }
     }
+    
+    
+    public function insertaProducto($producto,$idF){
+        $this->Conectar();
+        $desg = mssql_query('insert into compras.dbo.desgloseFactura(idFactura,idProducto,cantidad,precioUnitario) values(' . $idF . ',' . $producto->getIdProducto() . ',' . $producto->getCantidad() . ',' . $producto->getPrecio() . ')', $this->conexion);
+        $n= mssql_rows_affected($this->conexion);
+        mssql_close($this->conexion);
+        return $n;
+    }
+    
+    
+    public function InsertaCliente($cliente){
+        
+        $this->Conectar();
+        $q = mssql_query("insert into compras.dbo.cliente(nombre,telefono,direccion,contacto,tipo) values('". $cliente->getNombre() ."',". $cliente->getTelefono() .",'". $cliente->getDireccion() ."','". $cliente->getContacto() . "',".$cliente->getTipo().")", $this->conexion);
+        $n= mssql_rows_affected($this->conexion);
+        echo 'Hizo'.$n;
+        mssql_close($this->conexion);
+        return $n;
+            
+            }
+    
     
     
     public function InfoClientes()
@@ -299,6 +324,7 @@ class Conexion {
                 $infoFact->setCantidadProducto($row[2]);
                 $infoFact->setPrecioProducto($row[3]);
                 $infoFact->setNombreProducto($row[4]);
+                echo($infoFact->setNombreProducto());
                 $infoFact->setIdCliente($row[5]);
                 $infoFact->setNombreCliente($row[6]);
                 $infoFact->setTelefono($row[7]);
