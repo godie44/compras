@@ -5,7 +5,7 @@ include 'ClienteEn.php';
 include 'Conexion.php';
 
 session_start();
-
+echo 'Entro aqui';
 if($_POST["producto"])
 {
    $con = new Conexion();
@@ -34,8 +34,13 @@ if($_POST["producto"])
        
    }
    $_SESSION['productos']= $listaProductos;
-   
-}
+   $_POST['producto']=NULL;
+}elseif($_POST['idProducto'])
+    {
+        $con = new Conexion();
+        $prod =$con->InfoProductos($_POST["idProducto"]);
+        echo $prod->getCantidad();
+    }
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
