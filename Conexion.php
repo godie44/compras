@@ -205,11 +205,30 @@ class Conexion {
         $this->Conectar();
         $q = mssql_query("insert into compras.dbo.cliente(nombre,telefono,direccion,contacto,tipo) values('". $cliente->getNombre() ."',". $cliente->getTelefono() .",'". $cliente->getDireccion() ."','". $cliente->getContacto() . "',".$cliente->getTipo().")", $this->conexion);
         $n= mssql_rows_affected($this->conexion);
-        echo 'Hizo'.$n;
+        echo " 
+                <script language=’JavaScript’> 
+                alert(‘Cliente agregado con exito’); 
+                </script>";
         mssql_close($this->conexion);
         return $n;
             
             }
+            
+    public function InsertaProducto($producto){
+        
+        $this->Conectar();
+        $q = mssql_query("insert into compras.dbo.producto(nombre,precio,cantidadInventario) values('". $producto->getNombre() ."',". $producto->getPrecio() .",'". $producto->getCantidad() .")", $this->conexion);
+        $n= mssql_rows_affected($this->conexion);
+        echo " 
+                <script language=’JavaScript’> 
+                alert(‘Producto agregado con exito’); 
+                </script>";
+        mssql_close($this->conexion);
+        return $n;
+            
+            }
+            
+            
     
     
     
