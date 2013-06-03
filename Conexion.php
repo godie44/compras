@@ -91,18 +91,21 @@ class Conexion {
         $idF = 0;
         try {
             $this->Conectar();
-            $query = mssql_query('insert into compras.dbo.factura(idCliente,idUsuario,fecha,descuento) values(' . $idCliente . ',' . $idUsuario . ',getdate(),' . $descuento . ')', $this->conexion);
+            $query = mssql_query('insert into compras.dbo.factura(idCliente,idUsuario,fecha) values(' . $idCliente . ',' . $idUsuario . ',getdate())', $this->conexion);
 
-            if (mssql_num_rows($query)) {
+            if (mssql_rows_affected($this->conexion)>0) {
+                
                 $idFetch = mssql_query('select top 1 idFactura,fecha from compras.dbo.factura where idUsuario=' . $idUsuario . ' order by fecha desc', $this->conexion);
+                
                 while ($row = mssql_fetch_array($idFetch)) {
                     $idF = $row['idFactura'];
+                    
                 }
                 foreach ($productos as $producto) {
-                    $infoProducto = $this->InfoProductos($producto->getIdProducto);
-                    if ($infoProducto->getCantidad() - $producto->getCantidad() >= 0) {
+                    $infoProducto = $this->InfoProductos($producto->getIdProducto());
+                    if (($infoProducto->getCantidad() - $producto->getCantidad()) >= 0) {
                         $querydesglose = mssql_query('insert into compras.dbo.desgloseFactura(idFactura,idProducto,cantidad,precioUnitario) values(' . $idF . ',' . $producto->getIdProducto() . ',' . $producto->getCantidad() . ',' . $producto->getPrecio() . ')', $this->conexion);
-                        if (!mssql_num_rows($querydesglose)) {
+                        if (mssql_rows_affected($this->conexion)<0) {
                             echo 'No se pudo insertar el producto: ' . $infoProducto->getNombre();
                         } else {
                             $act = mssql_query('update compras.dbo.producto set cantidadInventario=' . ($infoProducto->getCantidad() - $producto->getCantidad()) . ' where idProducto=' . $infoProducto->getIdProducto());
@@ -117,7 +120,7 @@ class Conexion {
                         
                         $this->PedidoXFalta($idF, $solicitud, $idUsuario);
                         
-                        if (!mssql_num_rows($querydesglose)) {
+                        if (mssql_rows_affected($this->conexion)<0) {
                             echo 'No se pudo insertar el producto: ' . $infoProducto->getNombre();
                         } else {
                             $act = mssql_query('update compras.dbo.producto set cantidadInventario=0 where idProducto=' . $infoProducto->getIdProducto());
@@ -129,13 +132,19 @@ class Conexion {
                     while($row=  mssql_fetch_array($total)){
                         $totalNeto= $row[0];
                     }
-                    $descuento = $this->GetDescuento($total);
-                    $totalFinal =$totalNeto - ($totalNeto*($descuento/100));
-                    if($this->GetExcepcionImpuestos($idF)){
-                       $totalFinal =$totalNeto - ($totalNeto*(13/100)); 
+                    $totalFinal=$totalNeto;
+                    if($descuento == 1){
+                    $descuentoC = $this->GetDescuento($total);
+                    $totalFinal =$totalNeto - ($totalNeto*($descuentoC/100));}
+                    $descuentoC =0;
+                    if(!$this->GetExcepcionImpuestos($idF)){
+                    $impuesto = 13;
+                    $totalFinal =$totalNeto - ($totalNeto*(13/100)); 
+                    }else{
+                        $impuesto= 0;
                     }
                     
-                    mssql_query('update compras.dbo.factura set total = '.$totalFinal.' where idFactura='.$idF,$this->conexion);
+                    mssql_query('update compras.dbo.factura set total = '.$totalFinal.',descuento='.$descuentoC.',impuesto='.$impuesto.' where idFactura='.$idF,$this->conexion);
                     
                 }
             } else {
@@ -148,6 +157,7 @@ class Conexion {
             echo $e;
             mssql_close($this->conexion);
         }
+        return $idF;
     }
 
     public function PedidoXFalta($idFactura, $infoProducto, $idUsuario) {
@@ -276,23 +286,23 @@ class Conexion {
         try{
             $this->Conectar();
             
-            $query = mssql_query('select f.idFactura,df.idProducto,df.cantidad,df.precioUnitario,p.nombre,f.idCliente,c.nombre,c.telefono,f.fecha,f.descuento,f.exception.f.total,f.idUsuario,u.nombre from compras.dbo.desgloseFactura df inner join compras.dbo.factura f on df.idFactura = f.idFactura inner join compras.dbo.cliente c on f.idCliente = c.idCliente innerjoin compras.dbo.usuario u on u.idUsuario = f.idUsuario inner join compras.dbo.producto p on df.idProducto = p.idProducto where df.idFactura ='.$_idFactura,  $this->conexion);
+            $query = mssql_query('select f.idFactura,df.idProducto,df.cantidad,df.precioUnitario,p.nombre,f.idCliente,c.nombre,c.telefono,f.fecha,f.descuento,f.impuesto,f.total,f.idUsuario,u.nombre from compras.dbo.desgloseFactura df inner join compras.dbo.factura f on df.idFactura = f.idFactura inner join compras.dbo.cliente c on f.idCliente = c.idCliente inner join compras.dbo.usuario u on u.idUsuario = f.idUsuario inner join compras.dbo.producto p on df.idProducto = p.idProducto where df.idFactura ='.$_idFactura,  $this->conexion);
             
             while($row=  mssql_fetch_array($query)){
                 $infoFact = new FacturaEn();
-                $infoFact->getIdFactura($row[0]);
-                $infoFact->getIdProducto($row[1]);
-                $infoFact->getCantidadProducto($row[2]);
-                $infoFact->getPrecioProducto($row[3]);
-                $infoFact->getNombreProducto($row[4]);
-                $infoFact->getIdCliente($row[5]);
-                $infoFact->getTelefono($row[6]);
-                $infoFact->getFecha($row[7]);
-                $infoFact->getDescuento($row[8]);
-                $infoFact->getException($row[9]);
-                $infoFact->getTotal($row[10]);
-                $infoFact->getIdUsuario($row[11]);
-                $infoFact->getNombreUsuario($row[12]);
+                $infoFact->setIdFactura($row[0]);
+                $infoFact->setIdProducto($row[1]);
+                $infoFact->setCantidadProducto($row[2]);
+                $infoFact->setPrecioProducto($row[3]);
+                $infoFact->setNombreProducto($row[4]);
+                $infoFact->setIdCliente($row[5]);
+                $infoFact->setTelefono($row[6]);
+                $infoFact->setFecha($row[7]);
+                $infoFact->setDescuento($row[8]);
+                $infoFact->setException($row[9]);
+                $infoFact->setTotal($row[10]);
+                $infoFact->setIdUsuario($row[11]);
+                $infoFact->setNombreUsuario($row[12]);
                 
                 array_push($desglose, $infoFact);
             }

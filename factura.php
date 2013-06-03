@@ -12,16 +12,27 @@ and open the template in the editor.
     </head>
     <body>
         <?php
-        
+        include 'Conexion.php';
         session_start();
         
         if($_POST['Enviar']){
             if(!isset($_SESSION['usuario'])){
                 header("Location:index.php");
             }else{
-                
+                echo 'entro';
                 $con = new Conexion();
-                $con->InsertarCompra($idCliente, $idUsuario, $productos, $descuento)
+                $cliente = $con->InfoCliente($_POST['idCliente']);
+                $productos=$_SESSION['productos'];
+                $idFactura = $con->InsertarCompra($cliente->getIdCliente(), $_SESSION['usuario'], $productos, $cliente->getTipo());
+                
+                $factura = $con->GetDetallesFactura($idFactura);
+                echo 'entro2';
+                foreach($factura as $info)
+                    {
+                        echo $info->getIdFactura();
+                        echo $info->getIdProducto();
+                        echo $info->getNombreProducto();
+                    }
             }
         }  else {
             header("Location:index.php");
