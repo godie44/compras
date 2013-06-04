@@ -219,11 +219,11 @@ class Conexion {
       public function InsertaUsuario($usuario){
         
         $this->Conectar();
-        $q = mssql_query("insert into compras.dbo.cliente(nombre,apellidos,telefono,direccion,usuario,password) values('". $usuario->getNombre() ."',". $usuario->getTelefono() .",'". $usuario->getDireccion() ."','". $usuario->getUsuario() . "',".$usuario->getPassword().")", $this->conexion);
+        $q = mssql_query("insert into compras.dbo.usuario(nombre,apellidos,telefono,direccion,usuario,password) values('". $usuario->getNombre() ."','". $usuario->getApellidos() ."',". $usuario->getTelefono() .",'". $usuario->getDireccion() ."','". $usuario->getUsuario() . "','".$usuario->getPassword()."')", $this->conexion);
         $n= mssql_rows_affected($this->conexion);
         echo " 
                 <script language=’JavaScript’> 
-                alert(‘Cliente agregado con exito’); 
+                alert(‘Usuario agregado con exito’); 
                 </script>";
         mssql_close($this->conexion);
         return $n;

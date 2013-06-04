@@ -79,7 +79,7 @@ and open the template in the editor.
             <div id="top"></div>
             <div id="menu" style="background-color: lightblue;width: 800px">
                 <div style="background-color: lightblue;width: 120px;float: left"><a href="insertaCliente.php">Nuevo Cliente</a></div>
-                <div style="background-color: lightblue;width: 120px;float: left"><a href="#">Nuevo Usuario</a></div>
+                <div style="background-color: lightblue;width: 120px;float: left"><a href="insertaUsuario.php">Nuevo Usuario</a></div>
                 <div style="background-color: lightblue;width: 120px;float: left"><a href="productos.php">Productos</a></div>
             </div><br/>
             <span style="float: right">

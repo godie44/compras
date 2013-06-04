@@ -6,6 +6,8 @@ and open the template in the editor.
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link href="css/compras.css" rel="stylesheet" type="text/css"/>
+        <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
         <title></title>
     </head>
     <body>
@@ -21,14 +23,14 @@ and open the template in the editor.
                 $con = new Conexion();
             }
         if($_POST['Enviar']){
-            $cliente = new ClienteEn();
+            $cliente = new UsuarioEn();
             $cliente->setNombre($_POST['nombre']);
             $cliente->setApellidos($_POST['apellidos']);
             $cliente->setTelefono($_POST['telefono']);
             $cliente->setDireccion($_POST['direccion']);
-            $cliente->setContacto($_POST['usuario']);
-            $cliente->setTipo($_POST['password']);
-            $con->InsertaCliente($cliente);
+            $cliente->setUsuario($_POST['usuario']);
+            $cliente->setPassword($_POST['password']);
+            $con->InsertaUsuario($cliente);
             header("Location:inicio.php");
         }
         ?>
@@ -40,7 +42,7 @@ and open the template in the editor.
             <br/><br/>
             <center>
                 <h1>Usuario Nuevo</h1>
-            <form method="POST" action="insertaCliente.php">
+            <form method="POST" action="insertaUsuario.php">
             <table>
                 <tr><td>Nombre:</td><td><input type="text" name="nombre"></text></td></tr>
                 <tr><td>Apellidos:</td><td><input type="text" name="apellidos"></text></td></tr>
