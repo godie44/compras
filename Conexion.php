@@ -122,15 +122,18 @@ class Conexion {
                         $solicitud = new ProductoEn();
                         $solicitud->setIdProducto($infoProducto->getIdProducto());
                         $solicitud->setNombre($infoProducto->getNombre());
-                        $solicitud->setCantidad($producto->getCantidad()-$infoProducto->getCantidad());
+                        $solicitud->setCantidad(($producto->getCantidad()-$infoProducto->getCantidad()));
                         $solicitud->setPrecio($infoProducto->getPrecio());
                         echo '------aqui va------';
                         $this->PedidoXFalta($idF, $solicitud, $idUsuario);
-                        
+                        echo 'aqui va'.$n;
                         if ($n<0) {
                             echo 'No se pudo insertar el producto: ' . $infoProducto->getNombre();
                         } else {
-                            $act = mssql_query('update compras.dbo.producto set cantidadInventario=0 where idProducto=' . $infoProducto->getIdProducto());
+                            
+                            $act = mssql_query('update compras.dbo.producto set cantidadInventario=0 where idProducto=' . $producto->getIdProducto());
+                            echo 'aqui va'.$n;
+                            
                         }
                         
                     }
