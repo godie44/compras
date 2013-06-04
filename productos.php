@@ -29,6 +29,7 @@ and open the template in the editor.
             $producto->setCantidad($_POST['cantidad']);
             
             $con->InsertaProductoNuevo($producto);
+            echo "<script language=’JavaScript’>alert(‘Producto agregado con exito’);</script>";
             header("Location:inicio.php");
         }
         ?>

@@ -113,7 +113,7 @@ class Conexion {
                         if ($n<0) {
                             echo 'No se pudo insertar el producto: ' . $infoProducto->getNombre();
                         } else {
-                            echo 'aqui va';
+                            
                             $act = mssql_query('update compras.dbo.producto set cantidadInventario=' . ($infoProducto->getCantidad() - $producto->getCantidad()) . ' where idProducto=' . $infoProducto->getIdProducto());
                         }
                     }else{
@@ -124,10 +124,10 @@ class Conexion {
                         $solicitud->setNombre($infoProducto->getNombre());
                         $solicitud->setCantidad($producto->getCantidad()-$infoProducto->getCantidad());
                         $solicitud->setPrecio($infoProducto->getPrecio());
-                        
+                        echo '------aqui va------';
                         $this->PedidoXFalta($idF, $solicitud, $idUsuario);
                         
-                        if (mssql_rows_affected($this->conexion)<0) {
+                        if ($n<0) {
                             echo 'No se pudo insertar el producto: ' . $infoProducto->getNombre();
                         } else {
                             $act = mssql_query('update compras.dbo.producto set cantidadInventario=0 where idProducto=' . $infoProducto->getIdProducto());
@@ -173,15 +173,18 @@ class Conexion {
             $this->Conectar();
             $query = mssql_query('select idPedido from compras.dbo.pedidosXFactura where idFactura=' . $idFactura, $this->conexion);
             if (!mssql_num_rows($query)) {           
-                $query = mssql_query('insert into compras.dbo.pedido(fecha,idUsuario) values(getdate(),'.$idUsuario.')');
-            }
+                $query2 = mssql_query('insert into compras.dbo.pedido(fecha,idUsuario) values(getdate(),'.$idUsuario.')');
+            
             $queryId = mssql_query('select top 1 idPedido,fecha from compras.dbo.pedido where idUsuario=' . $idUsuario . ' order by fecha desc', $this->conexion);
            
             $row = mssql_fetch_array($queryId);
             $idP = $row[0];
 
             mssql_query('insert into compras.dbo.pedidosXFactura(idFactura,idPedido) values('.$idFactura.','.$idP.')', $this->conexion);
-            
+            }else{
+                $row = mssql_fetch_array($query);
+                $idP = $row[0];
+            }
             $inProd = mssql_query('insert into compras.dbo.desglosePedido(idPedido,idProducto,cantidad,precio) values('.$idP.','.$infoProducto->getIdProducto().','.$infoProducto->getCantidad().','.$infoProducto->getPrecio().')', $this->conexion);
             
             mssql_close($this->conexion);
@@ -237,12 +240,9 @@ class Conexion {
     public function InsertaProductoNuevo($producto){
         
         $this->Conectar();
-        $q = mssql_query("insert into compras.dbo.producto(nombre,precio,cantidadInventario) values('". $producto->getNombre() ."',". $producto->getPrecio() .",'". $producto->getCantidad() .")", $this->conexion);
+        $q = mssql_query("insert into compras.dbo.producto(nombre,precio,cantidadInventario) values('". $producto->getNombre() ."',". $producto->getPrecio() .",". $producto->getCantidad() .")", $this->conexion);
         $n= mssql_rows_affected($this->conexion);
-        echo " 
-                <script language=’JavaScript’> 
-                alert(‘Producto agregado con exito’); 
-                </script>";
+        
         mssql_close($this->conexion);
         return $n;
             

@@ -83,7 +83,7 @@ and open the template in the editor.
                 <div style="background-color: lightblue;width: 120px;float: left"><a href="productos.php">Productos</a></div>
             </div><br/>
             <span style="float: right">
-<?php echo 'Usuario actual:' . $_SESSION['user']; ?>
+                <?php echo 'Usuario actual:' . $_SESSION['user']; ?><a href="index.php">/Salir</a>
                 </span>
             <center>
                 <form action="factura.php" method="POST">
