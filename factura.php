@@ -13,35 +13,91 @@ and open the template in the editor.
     <body>
         <div id="content">
             <div id="top"></div>
-        <?php
-        include 'Conexion.php';
-        session_start();
-        
-        if($_POST['Enviar']){
-            if(!isset($_SESSION['usuario'])){
-                header("Location:index.php");
-            }else{
-                echo 'entro';
-                $con = new Conexion();
-                $cliente = $con->InfoCliente($_POST['idCliente']);
-                $productos=$_SESSION['productos'];
-                $idFactura = $con->InsertarCompra($cliente->getIdCliente(), $_SESSION['usuario'], $productos, $cliente->getTipo());
-                echo '<br/>Esta es la factura ='.$idFactura;
-                $factura = $con->GetDetallesFactura($idFactura);
-                echo 'entro2';
-                foreach($factura as $info)
-                    {
-                    echo 'entro2<br/>';
+            <?php
+            include 'Conexion.php';
+            session_start();
+
+            if ($_POST['Enviar']) {
+                if (!isset($_SESSION['usuario'])) {
+                    header("Location:index.php");
+                } else {
+                    
+                    $con = new Conexion();
+                    $cliente = $con->InfoCliente($_POST['idCliente']);
+                    $productos = $_SESSION['productos'];
+                    $idFactura = $con->InsertarCompra($cliente->getIdCliente(), $_SESSION['usuario'], $productos, $cliente->getTipo());
+                    
+                    $factura = $con->GetDetallesFactura($idFactura);
+                    $infoPersonal = $con->GetInfoFactura($idFactura);
+                     echo '<table style="border-collapse:collapse;border: 2px solid blue;">
+                        <tr >
+                        <th>Fecha:'.$infoPersonal->getFecha().'</th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Factura:'.$idFactura.'</th>
+                        <th></th>
+                        </tr>
+
+                        <tr>
+                        <th>Nombre'.$infoPersonal->getNombreCliente().'</th>
+                        <th></th>
+                        <th>Telefono:'.$infoPersonal->getTelefono().'</th>
+                        <th></th>
+                        <th>Cajero:'.$infoPersonal->getNombreUsuario().'</th>
+                        <th></th>
+                        </tr>
+
+                        <tr style="border-collapse:collapse;border: 2px solid blue;">
+                        <th>Id</th>
+                        <th>Nombre</th>
+                        <th>Cantidad solicitada</th>
+                        <th>Costo Unitario</th>
+                        <th>Total</th>
+                        <th></th>
+                        </tr>';
+                    foreach ($factura as $info) {
+                                              
+                        echo '
+                        <tr style="border-collapse:collapse;border: 1px solid blue;">
+                            <td>' . $info->getIdProducto() . '</td>
+                            <td>' . $info->getNombreProducto() . '</td>
+                            <td>' . $info->getCantidadProducto() . '</td>
+                            <td>' . $info->getPrecioProducto() . '</td>
+                            <td>' . $info->getPrecioProducto() * $info->getCantidadProducto() . '</td>';
+                   echo '<td></td></tr>';
+                            
+                            $total += $info->getTotal();
+                        }
+                        echo '<tr><td></td>';
+                        echo '<td></td>';
+                        echo '<td></td>';
+                        echo '<td>Descuento:</td>';
+                        echo '<td>' . $info->getDescuento() . '%</td>';
+                        echo '<td></td></tr>';
                         
-                        echo $info->getIdProducto();
-                        echo $info->getNombreProducto();
-                    }
+                        echo '<tr><td></td>';
+                        echo '<td></td>';
+                        echo '<td></td>';
+                        echo '<td>Impuesto:</td>';
+                        echo '<td>' . $info->getException() . '%</td>';
+                        echo '<td></td></tr>';
+                        
+                        echo '<tr style="border-collapse:collapse;border: 1px solid blue;"><td></td>';
+                        echo '<td></td>';
+                        echo '<td></td>';
+                        echo '<td>Total a pagar:</td>';
+                        echo '<td>' . $total . '</td>';
+                        echo '<td></td></tr>';
+
+                        echo '</table>';
+                    
+                }
+            } else {
+                header("Location:index.php");
             }
-        }  else {
-            header("Location:index.php");
-        }
-        ?>
-        
+            ?>
+
         </div> 
     </body>
 </html>

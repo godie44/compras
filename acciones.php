@@ -6,7 +6,7 @@ session_start();
 
 if($_POST["producto"])
 {
-   
+   $total = 0;
    $con = new Conexion();
    if(isset($_SESSION['productos'])){
    $listaProductos=$_SESSION['productos'];}
@@ -38,9 +38,16 @@ if($_POST["producto"])
            }else{
                echo '<td></td></tr>';
            }
-           
+           $total += $producto->getPrecio() * $producto->getCantidad();
        
    }
+   echo '<tr style="border-collapse:collapse;border: 1px solid blue;"><td></td>';
+   echo '<td></td>';
+   echo '<td></td>';
+   echo '<td></td>';
+   echo '<td>'.$total.'</td>';
+   echo '<td></td></tr>';
+   
    echo '</table>';
    $_SESSION['productos']= $listaProductos;
    $_POST['producto']=NULL;
