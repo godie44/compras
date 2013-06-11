@@ -67,7 +67,7 @@ and open the template in the editor.
                             <td>' . $info->getPrecioProducto() * $info->getCantidadProducto() . '</td>';
                    echo '<td></td></tr>';
                             
-                            $total += $info->getTotal();
+                            $total = $info->getTotal();
                         }
                         echo '<tr><td></td>';
                         echo '<td></td>';
