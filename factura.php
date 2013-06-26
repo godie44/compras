@@ -40,8 +40,8 @@ and open the template in the editor.
                         </tr>
 
                         <tr>
-                        <th>Nombre'.$infoPersonal->getNombreCliente().'</th>
                         <th></th>
+                        <th>Nombre'.$infoPersonal->getNombreCliente().'</th>
                         <th>Telefono:'.$infoPersonal->getTelefono().'</th>
                         <th></th>
                         <th>Cajero:'.$infoPersonal->getNombreUsuario().'</th>

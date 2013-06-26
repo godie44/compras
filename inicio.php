@@ -81,6 +81,7 @@ and open the template in the editor.
                 <div style="background-color: lightblue;width: 120px;float: left"><a href="insertaCliente.php">Nuevo Cliente</a></div>
                 <div style="background-color: lightblue;width: 120px;float: left"><a href="insertaUsuario.php">Nuevo Usuario</a></div>
                 <div style="background-color: lightblue;width: 120px;float: left"><a href="productos.php">Productos</a></div>
+                <div style="background-color: lightblue;width: 120px;float: left"><a href="verPedidos.php">Pedidos</a></div>
             </div><br/>
             <span style="float: right">
                 <?php echo 'Usuario actual:' . $_SESSION['user']; ?><a href="index.php">/Salir</a>
