@@ -6,6 +6,8 @@ and open the template in the editor.
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link href="css/compras.css" rel="stylesheet" type="text/css"/>
+        <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
         <title></title>
     </head>
     <body>
@@ -21,6 +23,17 @@ and open the template in the editor.
             $con = new Conexion();
         }
         ?>
+        
+        <div id="content">
+            <div id="top"></div>
+            <div id="menu" style="background-color: lightblue;width: 800px">
+                <div style="background-color: lightblue;width: 120px;float: left"><a href="inicio.php">Inicio</a></div>
+            </div>
+            <br/><br/>
+            <center>
+                <h1>Usuario Nuevo</h1>
+        
+        
         <table>
                         <tr>
                             <td>
@@ -37,7 +50,8 @@ and open the template in the editor.
                             </td>
                         </tr>
       </table>
-        
+            </center>
+        </div>
         
         
         
