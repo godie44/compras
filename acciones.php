@@ -11,9 +11,26 @@ if($_POST["producto"])
    if(isset($_SESSION['productos'])){
    $listaProductos=$_SESSION['productos'];}
    else{$listaProductos=array();}
+   $nuevo=true;
    $prod =$con->InfoProductos($_POST["producto"]);
    $prod->setCantidad($_POST["cantidad"]);
+   foreach($listaProductos as $p)
+       {
+            if($p->getIdProducto() == $prod->getIdProducto())
+                {
+                    $p->setCantidad($p->getCantidad()+$prod->getCantidad());
+                    $nuevo=false;
+                }
+       }
+   if($prod->getCantidad()>0){
+   if($nuevo==true){    
    array_push($listaProductos,$prod);
+   }
+   
+   }else
+       {
+       echo 'Por favor solicitar una cantidad mayor a 0';
+       }
    echo '<table style="border-collapse:collapse;border: 1px solid blue;border-spacing:50px 0">
            <tr style="border-collapse:collapse;border: 1px solid blue;">
            <th>Id</th>

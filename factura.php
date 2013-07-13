@@ -32,6 +32,7 @@ and open the template in the editor.
                     
                     $factura = $con->GetDetallesFactura($idFactura);
                     $infoPersonal = $con->GetInfoFactura($idFactura);
+                    if($idFactura != -99){
                      echo '<table style="border-collapse:collapse;width:100%;border: 2px solid blue;">
                         <tr >
                         <th></th>
@@ -94,6 +95,7 @@ and open the template in the editor.
                         echo '<td></td></tr>';
 
                         echo '</table>';
+                }
                         $_SESSION['productos'] = array();
                 }
             } else {
