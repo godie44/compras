@@ -13,6 +13,9 @@ and open the template in the editor.
     <body>
         <div id="content">
             <div id="top"></div>
+            <div id="menu" style="background-color: lightblue;width: 800px">
+                <div style="background-color: lightblue;width: 120px;float: left"><a href="inicio.php">Inicio</a></div>
+            </div>
             <?php
             include 'Conexion.php';
             session_start();
@@ -29,10 +32,10 @@ and open the template in the editor.
                     
                     $factura = $con->GetDetallesFactura($idFactura);
                     $infoPersonal = $con->GetInfoFactura($idFactura);
-                     echo '<table style="border-collapse:collapse;border: 2px solid blue;">
+                     echo '<table style="border-collapse:collapse;width:100%;border: 2px solid blue;">
                         <tr >
-                        <th>Fecha:'.$infoPersonal->getFecha().'</th>
                         <th></th>
+                        <th>Fecha:'.$infoPersonal->getFecha().'</th>
                         <th></th>
                         <th></th>
                         <th>Factura:'.$idFactura.'</th>
@@ -40,11 +43,11 @@ and open the template in the editor.
                         </tr>
 
                         <tr>
-                        <th>Nombre'.$infoPersonal->getNombreCliente().'</th>
                         <th></th>
-                        <th>Telefono:'.$infoPersonal->getTelefono().'</th>
+                        <th>Nombre: '.$infoPersonal->getNombreCliente().'</th>
+                        <th>Telefono: '.$infoPersonal->getTelefono().'</th>
                         <th></th>
-                        <th>Cajero:'.$infoPersonal->getNombreUsuario().'</th>
+                        <th>Cajero: '.$infoPersonal->getNombreUsuario().'</th>
                         <th></th>
                         </tr>
 
@@ -91,11 +94,12 @@ and open the template in the editor.
                         echo '<td></td></tr>';
 
                         echo '</table>';
-                    
+                        $_SESSION['productos'] = array();
                 }
             } else {
                 header("Location:index.php");
             }
+            
             ?>
 
         </div> 

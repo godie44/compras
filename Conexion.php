@@ -104,8 +104,7 @@ class Conexion {
                 }
                 foreach ($productos as $producto) {
                     $infoProducto = $this->InfoProductos($producto->getIdProducto());
-                    echo '-'.$idF.'-';
-                    echo $infoProducto->getNombre();
+                    
                     if (($infoProducto->getCantidad() - $producto->getCantidad()) >= 0) {
                         
                         $n = $this->insertaProducto($producto, $idF);
@@ -117,14 +116,14 @@ class Conexion {
                             $act = mssql_query('update compras.dbo.producto set cantidadInventario=' . ($infoProducto->getCantidad() - $producto->getCantidad()) . ' where idProducto=' . $infoProducto->getIdProducto());
                         }
                     }else{
-                        $producto->setCantidad($infoProducto->getCantidad());
+                        //$producto->setCantidad($infoProducto->getCantidad());
                         $n = $this->insertaProducto($producto, $idF);
                         $solicitud = new ProductoEn();
                         $solicitud->setIdProducto($infoProducto->getIdProducto());
                         $solicitud->setNombre($infoProducto->getNombre());
                         $solicitud->setCantidad(($producto->getCantidad()-$infoProducto->getCantidad()));
                         $solicitud->setPrecio($infoProducto->getPrecio());
-                        
+                        echo 'Resultado resta'.$producto->getCantidad().'-'.$infoProducto->getCantidad().' ='.$solicitud->getCantidad();
                         $this->PedidoXFalta($idF, $solicitud, $idUsuario);
                         
                         if ($n<0) {
