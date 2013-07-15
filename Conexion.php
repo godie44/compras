@@ -87,22 +87,65 @@ class Conexion {
         }
         return $info;
     }
+    
+    
+    
+    public function InfoProductosSD($idProducto = NULL) {
+        $info='';
+        try {
+            //$this->Conectar();
+            if ($idProducto == NULL) {
+                $info = array();
+                $query = mssql_query('select * from compras.dbo.producto', $this->conexion);
+                while ($row = mssql_fetch_array($query)) {
+                    $prod = new ProductoEn();
+                    $prod->setIdProducto($row['idProducto']);
+                    $prod->setNombre($row['nombre']);
+                    $prod->setCantidad($row['cantidadInventario']);
+                    $prod->getPrecio($row['precio']);
+
+                    array_push($info, $prod);
+                }
+            } else {
+                $query = mssql_query('select idProducto,nombre,cantidadInventario,precio from compras.dbo.producto where idProducto='.$idProducto, $this->conexion);
+                $row = mssql_fetch_array($query);
+                $info = new ProductoEn();
+                $info->setIdProducto($row['idProducto']);
+                $info->setNombre($row['nombre']);
+                $info->setCantidad($row['cantidadInventario']);
+                $info->setPrecio($row['precio']);
+            }
+
+            //mssql_close($this->conexion);
+        } catch (Exception $e) {
+            echo $e;
+            //mssql_close($this->conexion);
+        }
+        return $info;
+    }
+    
+    
+    
+    
+    
 
     public function InsertarCompra($idCliente, $idUsuario, $productos, $descuento, $archivo = NULL) {
         $idF = 0;
         try {
+            
             $this->Conectar();
+            
             $contador = 0;
             foreach ($productos as $producto) 
                 {
-                $infoProducto = $this->InfoProductos($producto->getIdProducto());
+                $infoProducto = $this->InfoProductosSD($producto->getIdProducto());
                 $contador += $infoProducto->getCantidad();
                 }
             
             if($contador>0){
             
             $query = mssql_query('insert into compras.dbo.factura(idCliente,idUsuario,fecha) values(' . $idCliente . ',' . $idUsuario . ',getdate())', $this->conexion);
-
+            echo 'Estas filas fueron:'.mssql_rows_affected($this->conexion);
             if (mssql_rows_affected($this->conexion)>0) {
                 
                 $idFetch = mssql_query('select top 1 idFactura,fecha from compras.dbo.factura where idUsuario=' . $idUsuario . ' and idCliente='.$idCliente.' order by fecha desc', $this->conexion);
@@ -112,7 +155,7 @@ class Conexion {
                     
                 }
                 foreach ($productos as $producto) {
-                    $infoProducto = $this->InfoProductos($producto->getIdProducto());
+                    $infoProducto = $this->InfoProductosSD($producto->getIdProducto());
                     
                     if (($infoProducto->getCantidad() - $producto->getCantidad()) >= 0) {
                         
@@ -133,7 +176,7 @@ class Conexion {
                         $solicitud->setCantidad(($producto->getCantidad()-$infoProducto->getCantidad()));
                         $solicitud->setPrecio($infoProducto->getPrecio());
                         echo 'Resultado resta'.$producto->getCantidad().'-'.$infoProducto->getCantidad().' ='.$solicitud->getCantidad();
-                        $this->PedidoXFalta($idF, $solicitud, $idUsuario);
+                        $this->PedidoXFalta($idF, $solicitud, $idUsuario,$idCliente);
                         
                         if ($n<0) {
                             echo 'No se pudo insertar el producto: ' . $infoProducto->getNombre();
@@ -173,17 +216,22 @@ class Conexion {
             }
         }else{
         $idF=-99;
+        $idPed = $this->InsertaNuevoPedido($idUsuario, $idCliente);
+        echo 'Este es el pedido:'.$idPed;
+        if($idPed>0){
         foreach ($productos as $producto) {
             
         
         $solicitud = new ProductoEn();
-        $infoProducto = $this->InfoProductos($producto->getIdProducto());
+        $infoProducto = $this->InfoProductosSD($producto->getIdProducto());
         $solicitud->setIdProducto($infoProducto->getIdProducto());
         $solicitud->setNombre($infoProducto->getNombre());
         $solicitud->setCantidad(($producto->getCantidad()-$infoProducto->getCantidad()));
         $solicitud->setPrecio($infoProducto->getPrecio());
-        echo 'Resultado resta'.$producto->getCantidad().'-'.$infoProducto->getCantidad().' ='.$solicitud->getCantidad();
-        $this->PedidoXFaltaSinFactura($solicitud, $idUsuario,$idCliente);}
+        echo 'Resultado resta sola'.$producto->getCantidad().'-'.$infoProducto->getCantidad().' ='.$solicitud->getCantidad();
+        $this->PedidoXFaltaSinFactura($solicitud, $idPed);}
+        }
+        
         }
 
             mssql_close($this->conexion);
@@ -222,27 +270,26 @@ class Conexion {
     }
     
     
-    
-    
-    public function PedidoXFaltaSinFactura($infoProducto, $idUsuario,$idCliente) {
-        try {
-            //$this->Conectar();
-            $query = mssql_query('select top 1 idPedido,fecha from compras.dbo.pedido where idUsuario=' . $idUsuario . 'and idCliente=' . $idCliente.' and estado=\'pendiente\' order by fecha desc', $this->conexion);
-            if (mssql_num_rows($query)==0) {    
-                
-            $query2 = mssql_query('insert into compras.dbo.pedido(fecha,idUsuario,estado) values(getdate(),'.$idUsuario.',\'pendiente\')',$this->conexion);
-            
+    public function InsertaNuevoPedido($idUsuario,$idCliente){
+        try{
+        $query = mssql_query('insert into compras.dbo.pedido(fecha,idUsuario,estado,idCliente) values(getdate(),'.$idUsuario.',\'pendiente\','.$idCliente.')',$this->conexion);
+        if (mssql_rows_affected($this->conexion)>0){
             $queryId = mssql_query('select top 1 idPedido,fecha from compras.dbo.pedido where idUsuario=' . $idUsuario . 'and idCliente=' . $idCliente.' and estado=\'pendiente\' order by fecha desc', $this->conexion);
-           
             $row = mssql_fetch_array($queryId);
             $idP = $row[0];
-
-            }else{
-                $row = mssql_fetch_array($query);
-                $idP = $row[0];
-            }
-            $inProd = mssql_query('insert into compras.dbo.desglosePedido(idPedido,idProducto,cantidad,precio) values('.$idP.','.$infoProducto->getIdProducto().','.$infoProducto->getCantidad().','.$infoProducto->getPrecio().')', $this->conexion);
-            
+        }else{$idP=-99;}
+        }catch (Exception $e) {
+        echo $e->getMessage();}
+        return $idP;
+        
+    }
+    
+    public function PedidoXFaltaSinFactura($infoProducto, $idP) {
+        try {
+            //$this->Conectar();
+                        
+            $inProdt = mssql_query('insert into compras.dbo.desglosePedido(idPedido,idProducto,cantidad,precio) values('.$idP.','.$infoProducto->getIdProducto().','.$infoProducto->getCantidad().','.$infoProducto->getPrecio().')', $this->conexion);
+            echo 'filas afectadas:'.mssql_rows_affected($this->conexion);
             //mssql_close($this->conexion);
         } catch (Exception $e) {
             echo $e->getMessage();
@@ -256,10 +303,10 @@ class Conexion {
     
     
     public function insertaProducto($producto,$idF){
-        $this->Conectar();
+        //$this->Conectar();
         $desg = mssql_query('insert into compras.dbo.desgloseFactura(idFactura,idProducto,cantidad,precioUnitario) values(' . $idF . ',' . $producto->getIdProducto() . ',' . $producto->getCantidad() . ',' . $producto->getPrecio() . ')', $this->conexion);
         $n= mssql_rows_affected($this->conexion);
-        mssql_close($this->conexion);
+        //mssql_close($this->conexion);
         return $n;
     }
     
@@ -375,7 +422,7 @@ class Conexion {
     public function GetDescuento($_total){
         $descuento = 0;
         try{
-            $this->Conectar();
+            //$this->Conectar();
             
             $query = mssql_query('select idDescuento,descuento,precio from compras.dbo.descuento order by precio desc',  $this->conexion);
             
@@ -385,10 +432,10 @@ class Conexion {
                     break;
                 }
             }
-            mssql_close($this->conexion);
+            //mssql_close($this->conexion);
         }  catch (Exception $ex){
             echo $ex->getMessage();
-            mssql_close($this->conexion);
+            //mssql_close($this->conexion);
     }
     return $descuento;
     }
@@ -396,15 +443,15 @@ class Conexion {
     public function GetExcepcionImpuestos($_idFactura){
         $excepcion = false;
         try {
-            $this->Conectar();
+            //$this->Conectar();
             $query = mssql_query('select idExcepcion,idCliente,archivo,idFactura from compras.dbo.excepcion where idFactura='.$_idFactura,$this->conexion);
             if(mssql_num_rows($query)){
                 $excepcion = true;
             }
-            mssql_close($this->conexion);
+            //mssql_close($this->conexion);
         }  catch (Exception $ex){
             echo $ex;
-            mssql_close($this->conexion);
+            //mssql_close($this->conexion);
         }
           return $excepcion;      
     }
@@ -468,6 +515,70 @@ class Conexion {
             mssql_close($this->conexion);
         }
         return $factura;
+    }
+    
+    
+        public function GetDetallesPedido($_idPedido){
+        $desglose = array();
+        try{
+            $this->Conectar();
+            
+            $query = mssql_query('select f.idPedido,df.idProducto,df.cantidad,df.precio,p.nombre,f.idCliente,c.nombre,c.telefono,f.fecha,f.total,f.idUsuario,u.nombre from compras.dbo.desglosePedido df inner join compras.dbo.pedido f on df.idPedido = f.idPedido inner join compras.dbo.cliente c on f.idCliente = c.idCliente inner join compras.dbo.usuario u on u.idUsuario = f.idUsuario inner join compras.dbo.producto p on df.idProducto = p.idProducto where df.idPedido ='.$_idPedido,  $this->conexion);
+            
+            while($row=  mssql_fetch_array($query)){
+                $infoFact = new FacturaEn();
+                $infoFact->setIdFactura($row[0]);
+                $infoFact->setIdProducto($row[1]);
+                $infoFact->setCantidadProducto($row[2]);
+                $infoFact->setPrecioProducto($row[3]);
+                $infoFact->setNombreProducto($row[4]);
+                echo($infoFact->getNombreProducto());
+                $infoFact->setIdCliente($row[5]);
+                $infoFact->setNombreCliente($row[6]);
+                $infoFact->setTelefono($row[7]);
+                $infoFact->setFecha($row[8]);
+                $infoFact->setTotal($row[9]);
+                $infoFact->setIdUsuario($row[10]);
+                $infoFact->setNombreUsuario($row[11]);
+                
+                array_push($desglose, $infoFact);
+            }
+            
+            
+            
+         mssql_close($this->conexion);
+        }  catch (Exception $ex){
+            echo $ex;
+            mssql_close($this->conexion);
+        }
+        return $desglose;
+    }
+    
+    
+    public function GetInfoPedido($_idCliente)
+    {
+        $pedidos= array();
+        
+        try{
+           $this->Conectar();
+           $query = mssql_query('select f.idPedido,f.idCliente,c.nombre,c.telefono,f.fecha,f.idUsuario,u.nombre from compras.dbo.pedido f inner join compras.dbo.cliente c on f.idCliente = c.idCliente inner join compras.dbo.usuario u on u.idUsuario = f.idUsuario where f.idCliente ='.$_idCliente,  $this->conexion);
+           while($row= mssql_fetch_array($query)){
+           $factura = new FacturaEn();
+           $factura->setIdFactura($row[0]);
+           $factura->setIdCliente($row[1]);
+           $factura->setNombreCliente($row[2]);
+           $factura->setTelefono($row[3]);
+           $factura->setFecha($row[4]);
+           $factura->setIdUsuario($row[5]);
+           $factura->setNombreUsuario($row[6]);
+           array_push($pedidos, $factura);
+           }
+           mssql_close($this->conexion);
+        }  catch (Exception $ex){
+            echo $ex;
+            mssql_close($this->conexion);
+        }
+        return $pedidos;
     }
 
 }

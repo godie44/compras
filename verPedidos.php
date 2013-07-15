@@ -9,6 +9,25 @@ and open the template in the editor.
         <link href="css/compras.css" rel="stylesheet" type="text/css"/>
         <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
         <title></title>
+        
+        <script>
+            $(document).ready(function() {
+               
+                $("#ddlCliente").change(function()
+                {
+                    var id = $("#ddlCliente").val();
+                    $.ajax({
+                        data: {idPedido: id},
+                        url: "acciones.php",
+                        type: "POST"
+
+                    }).done(function(response) {
+
+                        $("#pendiente").html(response);
+                    });
+                });
+            });
+        </script>
     </head>
     <body>
         <?php
@@ -31,7 +50,7 @@ and open the template in the editor.
             </div>
             <br/><br/>
             <center>
-                <h1>Usuario Nuevo</h1>
+                <h1>Lista de pedidos pendientes</h1>
         
         
         <table>
@@ -50,7 +69,11 @@ and open the template in the editor.
                             </td>
                         </tr>
       </table>
+                <div id="pendiente">
+                    
+                </div>
             </center>
+            
         </div>
         
         

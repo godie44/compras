@@ -32,7 +32,7 @@ and open the template in the editor.
                     
                     $factura = $con->GetDetallesFactura($idFactura);
                     $infoPersonal = $con->GetInfoFactura($idFactura);
-                    if($idFactura != -99){
+                    if($idFactura > 0){
                      echo '<table style="border-collapse:collapse;width:100%;border: 2px solid blue;">
                         <tr >
                         <th></th>
@@ -96,6 +96,68 @@ and open the template in the editor.
 
                         echo '</table>';
                 }
+                echo'<br/><br/><center><b>Pedidos pendientes del cliente</b></center><br/><br/>';
+                
+                $infoPedidos = $con->GetInfoPedido($cliente->getIdCliente());
+                //SE USO LA ENTIDAD DE LA FACTURA PERO TIENE LA INFORMACION DE LOS PEDIDOS!!!!!!!!!!!!
+                
+                foreach($infoPedidos as $infoP)
+                {
+                    $pedidos = $con->GetDetallesPedido($infoP->getIdFactura());
+                    echo '<br/><br/><br/>
+                        <table style="border-collapse:collapse;width:100%;border: 2px solid blue;">
+                        <tr >
+                        <th></th>
+                        <th>Fecha:'.$infoP->getFecha().'</th>
+                        <th></th>
+                        <th></th>
+                        <th>Pedido:'.$infoP->getIdFactura().'</th>
+                        <th></th>
+                        </tr>
+
+                        <tr>
+                        <th></th>
+                        <th>Nombre: '.$infoP->getNombreCliente().'</th>
+                        <th>Telefono: '.$infoP->getTelefono().'</th>
+                        <th></th>
+                        <th>Cajero: '.$infoP->getNombreUsuario().'</th>
+                        <th></th>
+                        </tr>
+
+                        <tr style="border-collapse:collapse;border: 2px solid blue;">
+                        <th>Id</th>
+                        <th>Nombre</th>
+                        <th>Cantidad solicitada</th>
+                        <th>Costo Unitario</th>
+                        <th>Total</th>
+                        <th></th>
+                        </tr>';
+                    foreach ($pedidos as $info) {
+                                              
+                        echo '
+                        <tr style="border-collapse:collapse;border: 1px solid blue;">
+                            <td>' . $info->getIdProducto() . '</td>
+                            <td>' . $info->getNombreProducto() . '</td>
+                            <td>' . $info->getCantidadProducto() . '</td>
+                            <td>' . $info->getPrecioProducto() . '</td>
+                            <td>' . $info->getPrecioProducto() * $info->getCantidadProducto() . '</td>';
+                   echo '<td></td></tr>';
+                            
+                            $total = $info->getTotal();
+                        }
+                                                
+                        echo '<tr style="border-collapse:collapse;border: 1px solid blue;"><td></td>';
+                        echo '<td></td>';
+                        echo '<td></td>';
+                        echo '<td>Total a pagar:</td>';
+                        echo '<td>' . $total . '</td>';
+                        echo '<td></td></tr>';
+
+                        echo '</table>';
+                }
+                    
+                
+                
                         $_SESSION['productos'] = array();
                 }
             } else {
